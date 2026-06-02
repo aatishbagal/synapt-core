@@ -2,4 +2,5 @@
 // Copyright 2024 [Your Name]
 
 pub mod types;
+pub mod tray;
 pub use types::*;
