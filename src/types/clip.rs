@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2024 [Your Name]
+
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
 
