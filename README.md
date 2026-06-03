@@ -1,6 +1,11 @@
 # synapt-core
 
-![Synapt](./assets/images/logo/png/SynaptV2_White_PNG.png)
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/images/logo/png/SynaptV2_White_PNG_512sq.png">
+    <img src="./assets/images/logo/png/SynaptV2_Black_PNG_512sq.png" alt="Synapt" width="120">
+  </picture>
+</p>
 
 synapt-core is the shared type library for the Synapt ecosystem. It defines the data structures used across Synapt and SynaptClip with no logic, no networking, and no async code.
 
@@ -19,14 +24,14 @@ synapt-core is the shared type library for the Synapt ecosystem. It defines the 
 - No platform-specific code
 - No business logic
 
-For the application code see [synapt](https://github.com/[username]/synapt) or [synapt-clip](https://github.com/[username]/synapt-clip).
+For the application code see [synapt](https://github.com/aatishbagal/synapt) or [synapt-clip](https://github.com/aatishbagal/synapt-clip).
 
 ## Usage
 
 This crate is not published to crates.io. Synapt and SynaptClip consume it via a path dependency set up by their install scripts.
 
 ```bash
-git clone https://github.com/[username]/synapt-core.git
+git clone https://github.com/aatishbagal/synapt-core.git
 ```
 
 ```toml
