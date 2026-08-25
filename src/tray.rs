@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2024 [Your Name]
+// Copyright 2026 Aatish Bagal
 
 //! Shared control channel for a single system-tray icon across the Synapt apps.
 //!

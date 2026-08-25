@@ -86,4 +86,6 @@ This crate has a narrow scope by design. Changes to shared types affect both Syn
 
 ## License
 
-Apache License 2.0 — see [LICENSE](./LICENSE).
+Copyright 2026 Aatish Bagal
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full text.
