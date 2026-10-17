@@ -3,4 +3,7 @@
 
 pub mod types;
 pub mod tray;
+/// Wayland global shortcuts shared by the desktop applications.
+#[cfg(feature = "portal-hotkey")]
+pub mod portal_hotkey;
 pub use types::*;
