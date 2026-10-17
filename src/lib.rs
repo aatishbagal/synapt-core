@@ -7,3 +7,6 @@ pub mod tray;
 #[cfg(feature = "portal-hotkey")]
 pub mod portal_hotkey;
 pub use types::*;
+/// Bundled core version and release compatibility checks.
+#[cfg(feature = "updates")]
+pub mod updates;
