@@ -1,0 +1,59 @@
+name: Core CI and release
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          components: clippy
+      - uses: swatinem/rust-cache@v2
+      - name: Test release metadata and shared features
+        run: cargo test --locked --all-features
+      - name: Clippy
+        run: cargo clippy --locked --all-features -- -D warnings
+
+  publish:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish core version and compatibility feed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(jq -r .version core.json)
+          tag="v$version"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            git fetch origin "refs/tags/$tag:refs/tags/$tag"
+            if ! git diff --exit-code "$tag" HEAD -- src Cargo.toml Cargo.lock core.json; then
+              echo "Core code changed without a version bump. Update Cargo.toml and core.json."
+              exit 1
+            fi
+            echo "Core $version is already released."
+            exit 0
+          fi
+          jq -r .notes core.json > "$RUNNER_TEMP/core-release-notes.txt"
+          gh release create "$tag" core.json \
+            --target "$GITHUB_SHA" \
+            --title "SynaptCore $version" \
+            --notes-file "$RUNNER_TEMP/core-release-notes.txt" \
+            --latest
