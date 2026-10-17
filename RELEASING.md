@@ -1,12 +1,15 @@
 # SynaptCore releases
 
 SynaptCore is compiled into Synapt and SynaptClip. It is never downloaded as
-executable code independently of an app update. Both apps read the published
-`core.json` asset for availability and compatibility; installation continues
-through their signed Tauri app updater.
+executable code independently of an app update. Both apps resolve the latest
+published stable release through GitHub's API and read `core.json` from that
+exact tag. The release asset is a fallback when the API or tagged file cannot
+be reached. Installation continues through their signed Tauri app updater.
 
-The 0.2.0 release adds Wayland portal hotkeys and core update reporting. Synapt
-and SynaptClip 0.5.4 include it. Their version numbers are independent.
+The 0.2.0 release adds Wayland portal hotkeys and core update reporting. The
+0.2.1 patch fixes checks that stall on release-download redirects and exposes
+connection failure causes. Synapt and SynaptClip 0.5.4 include 0.2.1. Their
+version numbers are independent.
 
 ## Version policy
 
