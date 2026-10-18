@@ -2,6 +2,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.2]
+### Changed
+- core.json now declares only a minimum app version (0.5.4), with no upper bound
+- Apps depend on core with a caret range, so compatible core patches need no app manifest change
+
 ## [0.2.1] - 2026-10-17
 ### Added
 - Fallback download path for core update checks
