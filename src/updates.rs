@@ -345,7 +345,7 @@ mod tests {
 
     fn published_json() -> String {
         serde_json::json!({
-            "tag_name": "v0.2.2", "draft": false, "prerelease": false,
+            "tag_name": "v0.2.3", "draft": false, "prerelease": false,
             "assets": [{"name": "core.json"}]
         })
         .to_string()
@@ -356,15 +356,15 @@ mod tests {
         let (api, api_server) = respond_once(200, published_json(), Duration::ZERO).await;
         let (raw, raw_server) = respond_once_at(
             200,
-            BUNDLED_MANIFEST.replace("0.2.1", "0.2.2"),
+            BUNDLED_MANIFEST.replace("0.2.2", "0.2.3"),
             Duration::ZERO,
-            Some("/v0.2.2/core.json"),
+            Some("/v0.2.3/core.json"),
         )
         .await;
         let status = check_sources(
             "synapt",
             "0.5.4",
-            "=0.2.1",
+            "=0.2.2",
             ReleaseSources {
                 api: &api,
                 tags: raw.trim_end_matches("core.json"),
@@ -375,7 +375,7 @@ mod tests {
         .await;
         api_server.await.unwrap();
         raw_server.await.unwrap();
-        assert_eq!(status.latest_version.as_deref(), Some("0.2.2"));
+        assert_eq!(status.latest_version.as_deref(), Some("0.2.3"));
         assert!(status.update_available);
         assert!(status.check_error.is_none());
     }
@@ -389,7 +389,7 @@ mod tests {
             let status = check_sources(
                 "synapt-clip",
                 "0.5.4",
-                "=0.2.1",
+                "=0.2.2",
                 ReleaseSources {
                     api: &api,
                     tags: "http://127.0.0.1:1/",
@@ -413,7 +413,7 @@ mod tests {
         let status = check_sources(
             "synapt",
             "0.5.4",
-            "=0.2.1",
+            "=0.2.2",
             ReleaseSources {
                 api: &api,
                 tags: raw.trim_end_matches("core.json"),
@@ -439,7 +439,7 @@ mod tests {
         let status = check_sources(
             "synapt",
             "0.5.4",
-            "=0.2.1",
+            "=0.2.2",
             ReleaseSources {
                 api: &api,
                 tags: "http://127.0.0.1:1/",
@@ -473,11 +473,11 @@ mod tests {
 
     #[tokio::test]
     async fn http_check_reads_published_core_metadata() {
-        let body = BUNDLED_MANIFEST.replace("0.2.1", "0.2.2");
+        let body = BUNDLED_MANIFEST.replace("0.2.2", "0.2.3");
         let (url, server) = respond_once(200, body, Duration::ZERO).await;
-        let status = check_at("synapt", "0.5.4", "=0.2.1", &url, Duration::from_secs(2)).await;
+        let status = check_at("synapt", "0.5.4", "=0.2.2", &url, Duration::from_secs(2)).await;
         server.await.unwrap();
-        assert_eq!(status.latest_version.as_deref(), Some("0.2.2"));
+        assert_eq!(status.latest_version.as_deref(), Some("0.2.3"));
         assert!(status.update_available);
         assert!(status.check_error.is_none());
     }
@@ -491,7 +491,7 @@ mod tests {
             (200, "x".repeat(65537)),
         ] {
             let (url, server) = respond_once(code, body, Duration::ZERO).await;
-            let status = check_at("synapt", "0.5.3", "=0.2.1", &url, Duration::from_secs(2)).await;
+            let status = check_at("synapt", "0.5.3", "=0.2.2", &url, Duration::from_secs(2)).await;
             server.await.unwrap();
             assert!(status.check_error.is_some());
             assert!(status.latest_version.is_none());
@@ -507,7 +507,7 @@ mod tests {
         let status = check_at(
             "synapt",
             "0.5.4",
-            "=0.2.1",
+            "=0.2.2",
             &url,
             Duration::from_millis(100),
         )
@@ -532,23 +532,39 @@ mod tests {
     #[test]
     fn bundled_manifest_matches_version_and_both_apps() {
         for app in ["synapt", "synapt-clip"] {
-            let status = bundled_status(app, "0.5.4", "=0.2.1");
+            let status = bundled_status(app, "0.5.4", "=0.2.2");
             assert!(status.compatible, "{:?}", status.compatibility_warning);
             assert!(status.latest_version.is_none());
         }
     }
 
     #[test]
+    fn bundled_manifest_sets_a_minimum_app_version_only() {
+        for app in ["synapt", "synapt-clip"] {
+            for version in ["0.5.4", "0.6.0", "0.9.3", "1.0.0"] {
+                assert!(bundled_status(app, version, "^0.2.2").compatible, "{app} {version}");
+            }
+            assert!(!bundled_status(app, "0.5.3", "^0.2.2").compatible);
+        }
+    }
+
+    #[test]
+    fn caret_requirement_accepts_patches_but_not_breaking_core() {
+        assert!(bundled_status("synapt", "0.6.0", "^0.2.0").compatible);
+        assert!(!bundled_status("synapt", "0.6.0", "^0.3.0").compatible);
+    }
+
+    #[test]
     fn rejects_old_core_or_incompatible_app_without_network() {
         assert!(!bundled_status("synapt", "0.5.4", ">=0.3.0").compatible);
-        assert!(!bundled_status("synapt-clip", "0.5.3", "=0.2.1").compatible);
-        assert!(!bundled_status("unknown", "0.5.4", "=0.2.1").compatible);
+        assert!(!bundled_status("synapt-clip", "0.5.3", "=0.2.2").compatible);
+        assert!(!bundled_status("unknown", "0.5.4", "=0.2.2").compatible);
     }
 
     #[test]
     fn newer_patch_is_available_even_if_current_app_is_compatible() {
-        let mut status = bundled_status("synapt", "0.5.4", "=0.2.1");
-        apply_release(&mut status, &release("0.2.2", ">=0.5.4"), "synapt", "0.5.4").unwrap();
+        let mut status = bundled_status("synapt", "0.5.4", "=0.2.2");
+        apply_release(&mut status, &release("0.2.3", ">=0.5.4"), "synapt", "0.5.4").unwrap();
         assert!(status.update_available);
         assert!(status.compatible);
         assert_eq!(status.latest_app_compatible, Some(true));
@@ -556,7 +572,7 @@ mod tests {
 
     #[test]
     fn newer_core_can_require_a_newer_app() {
-        let mut status = bundled_status("synapt-clip", "0.5.4", "=0.2.1");
+        let mut status = bundled_status("synapt-clip", "0.5.4", "=0.2.2");
         apply_release(
             &mut status,
             &release("0.3.0", ">=0.6.0"),
@@ -571,8 +587,8 @@ mod tests {
 
     #[test]
     fn equal_or_older_release_does_not_offer_a_downgrade() {
-        for version in ["0.2.1", "0.1.0"] {
-            let mut status = bundled_status("synapt", "0.5.4", "=0.2.1");
+        for version in ["0.2.2", "0.1.0"] {
+            let mut status = bundled_status("synapt", "0.5.4", "=0.2.2");
             apply_release(&mut status, &release(version, ">=0.5.4"), "synapt", "0.5.4").unwrap();
             assert!(!status.update_available);
         }
@@ -581,14 +597,14 @@ mod tests {
     #[test]
     fn malformed_or_prerelease_feed_never_claims_up_to_date() {
         for version in ["invalid", "0.3.0-beta.1"] {
-            let mut status = bundled_status("synapt", "0.5.4", "=0.2.1");
+            let mut status = bundled_status("synapt", "0.5.4", "=0.2.2");
             assert!(
                 apply_release(&mut status, &release(version, ">=0.5.4"), "synapt", "0.5.4")
                     .is_err()
             );
             assert!(status.latest_version.is_none());
         }
-        let mut status = bundled_status("synapt", "0.5.4", "=0.2.1");
+        let mut status = bundled_status("synapt", "0.5.4", "=0.2.2");
         let mut invalid = release("0.3.0", ">=0.5.4");
         invalid.schema_version = 2;
         assert!(apply_release(&mut status, &invalid, "synapt", "0.5.4").is_err());

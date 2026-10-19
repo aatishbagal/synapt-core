@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "apps": {
-    "synapt": ">=0.5.4, <0.6.0",
-    "synapt-clip": ">=0.5.4, <0.6.0"
+    "synapt": ">=0.5.4",
+    "synapt-clip": ">=0.5.4"
   },
-  "notes": "Fixes core update checks when release downloads stall, adds a fallback download path, and shows clearer connection errors."
+  "notes": "Works with every Synapt and SynaptClip release from 0.5.4 on, so app updates no longer wait for a matching core release."
 }
