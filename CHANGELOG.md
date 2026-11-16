@@ -2,6 +2,14 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.2.3] - 2026-11-16
+### Security
+- Updated TLS certificate verification and bundled trust roots to address CVE-2026-111943
+- Updated anyhow and rustix to resolve dependency unsoundness advisories
+
+### Fixed
+- Core updater tests derive the current and next patch versions from release metadata
+
 ## [0.2.2]
 ### Changed
 - core.json now declares only a minimum app version (0.5.4), with no upper bound
