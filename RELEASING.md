@@ -49,3 +49,20 @@ apps show the newer core as available and explain that it arrives through an
 app update. An offline, missing, or malformed feed is shown as a failed check,
 never as proof that the installation is up to date. App update checks remain
 independent, so a core-feed failure cannot hide an available app update.
+
+## Security rollout: core 0.2.3
+
+1. Commit and push core/dev first, then wait for its verification workflow.
+2. Commit and push the app dev branches with both core requirements set to
+   `^0.2.3` and the core lock entry at `0.2.3`. The core lockfile does not control
+   app dependencies; each app lockfile must also contain the patched TLS crates.
+3. Merge the core PR to main and wait for stable release `v0.2.3` with its
+   `core.json` asset. Keep the minimum supported app versions at `>=0.5.4`: this
+   patch does not require new app behavior.
+4. Merge and release Synapt 0.6.2 and SynaptClip 0.6.1. These two app releases
+   can run in either order once core is published. Their release workflows
+   select `v0.2.3` from the app lockfile and stop if it is unavailable.
+
+Installed apps receive the patched core through their signed app update. A
+newer core feed is informational and must not block the app updater; it is
+normal for it to appear before both app releases are available.
